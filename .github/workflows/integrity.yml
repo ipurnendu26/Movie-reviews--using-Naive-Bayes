@@ -1,0 +1,22 @@
+name: Notebook integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate notebook JSON
+        run: |
+          find . -name '*.ipynb' -print0 | while IFS= read -r -d '' file; do
+            python -m json.tool "$file" > /dev/null
+          done
+      - name: Check merge markers
+        run: '! git grep -nE "^(<<<<<<<|=======|>>>>>>>)"'
